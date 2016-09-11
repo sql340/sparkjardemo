@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+     http://www.springframework.org/schema/context 
+     http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+
+	<bean id="getUseridUuidByDt" class="com.meituan.stolencard.stolencard.dao.RiskLogMapper">
+		<property name="sqlOnDataFromRiskLog"
+			value="select risklog.`_mt_datetime`, risklog.userid, risklog.uuid, risklog.`_mt_clientip`, 
+	   					risklog.action, risklog.bankcard, risklog.bankmobile, risklog.bindmobile,
+	   					risklog.dealid, risklog.bankcard_identityno, risklog.partner, risklog.platform, risklog.data,
+	   					quicksign.regtimestamp 
+				   from ba_rc.web_rc_risklog as risklog
+				   left join ba_rc.user_quicksigninfo as quicksign
+				   on get_json_object(risklog.data,'$.bankcardno_hash') = quicksign.bankcardno_hash
+				   where risklog.dt = 20160225 and risklog.action in (32,33) and risklog.`_mt_action` like 'RISKLEVEL'
+				   and quicksign.regtimestamp is not null
+				   having quicksign.regtimestamp is not null and length(quicksign.regtimestamp) > 0
+				   limit 1000
+				   ">
+		</property>
+
+		<property name="sqlOnSumMoneyByUserid"
+			value="select userid,count(outmoney)
+				   from ba_rc.web_rc_risklog 
+				   where dt = 20160225 and action = 35 and `_mt_datetime` 
+				   limit 1000
+				   ">
+		</property>
+	</bean>
+
+</beans>
